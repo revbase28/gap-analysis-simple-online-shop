@@ -1,5 +1,6 @@
-# Ignore these folder
-fe-online-shop\node_modules\
+# System files
+.DS_Store
+Thumbs.db
 
 # Compiled source #
 ###################
