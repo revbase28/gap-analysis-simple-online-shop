@@ -1,9 +1,6 @@
 package com.gap.analysis.be_simple_online_shop.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +18,7 @@ import java.util.UUID;
 public class Item {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "items_id")
     private long itemId;
 
@@ -31,10 +29,10 @@ public class Item {
     private UUID itemCode = UUID.randomUUID();
 
     @Column(columnDefinition = "MEDIUMINT UNSIGNED")
-    private long stock;
+    private Long stock;
 
     @Column(columnDefinition = "BIGINT UNSIGNED")
-    private long price;
+    private Long price;
 
     @Column(name = "is_available")
     private Boolean isAvailable;

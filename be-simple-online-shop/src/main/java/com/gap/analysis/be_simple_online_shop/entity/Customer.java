@@ -1,5 +1,6 @@
 package com.gap.analysis.be_simple_online_shop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,6 +45,7 @@ public class Customer {
 
     private String pic;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "customer")
     private List<Order> orders;
 
