@@ -1,4 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
+@import "@fortawesome/fontawesome-free/css/all.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,15 +15,15 @@ body {
   }
 
   .btn-edit {
-    @apply p-2 min-w-[5em] rounded-md bg-blue-400 mr-1 text-white shadow-sm hover:bg-blue-500 active:hover:bg-blue-600;
+    @apply p-2 min-w-[5em] rounded-md bg-blue-400 mr-1 text-white shadow-sm hover:bg-blue-500 active:hover:bg-blue-600 disabled:opacity-50;
   }
 
   .btn-delete {
-    @apply p-2 min-w-[5em] rounded-md bg-red-400 text-white shadow-sm hover:bg-red-500 active:hover:bg-red-600;
+    @apply p-2 min-w-[5em] rounded-md bg-red-400 text-white shadow-sm hover:bg-red-500 active:hover:bg-red-600 disabled:opacity-50;
   }
 
   .btn-add {
-    @apply p-2 min-w-[5em] rounded-md bg-green-400 text-white shadow-sm hover:bg-green-500 active:hover:bg-green-600;
+    @apply p-2 min-w-[5em] rounded-md bg-green-400 text-white shadow-sm hover:bg-green-500 active:hover:bg-green-600 disabled:opacity-50;
   }
 
   .page-title {
@@ -42,5 +44,9 @@ body {
 
   .form-group input {
     @apply block border border-slate-700 w-full px-2 py-2 bg-slate-50 rounded-md;
+  }
+
+  .form-group input.radio {
+    @apply inline w-fit;
   }
 }

@@ -1,7 +1,9 @@
 <div class="content-container">
   <div class="flex justify-between align-middle">
     <h1 class="page-title">Customer</h1>
-    <button (click)="isFormOpen = true" class="btn-add h-fit">+ Add New</button>
+    <button (click)="openAddFormDialog()" class="btn-add h-fit">
+      + Add New
+    </button>
   </div>
   <table class="table-auto w-full">
     <thead>
@@ -24,15 +26,15 @@
         <td class="py-8">{{ customer.customerAddress }}</td>
         <td class="py-8">{{ customer.customerPhone }}</td>
         <td class="py-8">
-          {{
-            customer.lastOrderDate == null ? "No Order" : customer.lastOrderDate
-          }}
+          {{ customer.lastOrderDate ? customer.lastOrderDate : "No Order" }}
         </td>
         <td class="py-8">
           <div>
-            <button class="btn-edit">Edit</button>
+            <button (click)="openEditFormDialog(customer)" class="btn-edit">
+              Edit
+            </button>
             <button
-              (click)="openDialog(customer.customerId)"
+              (click)="openDeleteConfirmDialog(customer)"
               class="btn-delete"
             >
               Delete
@@ -46,67 +48,209 @@
 </div>
 
 <!-- Confirmation Dialog Overlay -->
-<div *ngIf="isDialogOpen" class="overlay">
+<div *ngIf="isConfirmDialogOpen" class="overlay">
   <app-dialog-confimation
-    (cancelEvent)="closeDialog()"
+    (cancelEvent)="closeDialogConfirmDialog()"
     (confirmDeleteEvent)="deleteCustomer()"
   ></app-dialog-confimation>
 </div>
 
-<!-- Form Dialog -->
-@if (isFormOpen) {
+<!-- Add Form Dialog -->
+@if (isAddCusFormOpen) {
 <div class="overlay">
-  <div class="bg-white p-6 rounded-md shadow-lg max-w-md w-full">
+  <div class="relative bg-white p-6 rounded-md shadow-lg max-w-md w-full">
     <h2 class="text-xl font-semibold mb-4 text-center">Add New Customer</h2>
-    <button></button>
-    <form (ngSubmit)="({})" #addForm="ngForm">
+    <button (click)="closeAddFormDialog()" class="absolute right-4 top-4">
+      <i class="fa fa-close fa-lg"></i>
+    </button>
+    <form (ngSubmit)="onAddFormSubmit()" #addForm="ngForm">
       <div class="form-group">
         <label for="customerName">Customer Name</label>
         <input
+          ngModel
+          #customerName="ngModel"
           type="text"
           id="customerName"
-          ngModel
           name="customerName"
           placeholder="Enter Customer Name"
+          required
+          maxlength="255"
         />
+        @if (customerName.invalid && customerName.touched) {
+        <div *ngIf="customerName.errors?.['required']" class="text-red-500">
+          Customer Name is required.
+        </div>
+        }
       </div>
       <div class="form-group">
         <label for="customerAddress">Customer Address</label>
         <input
+          ngModel
+          #customerAddress="ngModel"
           type="text"
           class="h-20 align-top"
           id="customerAddress"
           ngModel
           name="customerAddress"
           placeholder="Enter Customer Address"
+          required
+          maxlength="255"
         />
+        @if (customerAddress.invalid && customerAddress.touched) {
+        <div *ngIf="customerAddress.errors?.['required']" class="text-red-500">
+          Customer Address is required.
+        </div>
+        }
       </div>
       <div class="form-group">
         <label for="customerName">Phone Number</label>
         <input
-          type="text"
+          ngModel
+          #customerPhone="ngModel"
+          type="tel"
           id="customerPhone"
           ngModel
           name="customerPhone"
           placeholder="Enter Phone Number"
+          required
+          maxlength="20"
         />
+        @if (customerPhone.invalid && customerPhone.touched) {
+        <div *ngIf="customerPhone.errors?.['required']" class="text-red-500">
+          Phone number is required.
+        </div>
+        }
       </div>
       <div class="form-group">
-        <label for="customerName">Phone Number</label>
+        <label for="customerName">Avatar</label>
+        @if(imagePreview != null) {
+        <img [src]="imagePreview" class="max-h-[130px] mb-2" alt="" />
+        }
         <input
+          ngModel
+          #pic="ngModel"
           type="file"
-          id="customerPhone"
-          ngModel
-          name="customerPhone"
-          placeholder="Enter Phone Number"
+          id="pic"
+          name="pic"
+          placeholder="Enter Avatar file"
+          required
+          accept="image/*"
+          (change)="onFileChange($event)"
         />
+        @if (pic.invalid && pic.touched) {
+        <div *ngIf="pic.errors?.['required']" class="text-red-500">
+          Avatar is required.
+        </div>
+        }
+      </div>
+      <div class="flex justify-stretch">
+        <button
+          type="submit"
+          [disabled]="addForm.invalid"
+          class="btn-add w-full"
+        >
+          Add New Customer
+        </button>
       </div>
     </form>
-    <div class="flex justify-stretch">
-      <button (click)="isFormOpen = false" class="btn-add w-full">
-        Add New Customer
-      </button>
-    </div>
+  </div>
+</div>
+}
+
+<!-- Edit Form Dialog -->
+@if (isEditCusFormOpen) {
+<div class="overlay">
+  <div class="relative bg-white p-6 rounded-md shadow-lg max-w-md w-full">
+    <h2 class="text-xl font-semibold mb-4 text-center">Edit Customer</h2>
+    <button (click)="closeEditFormDialog()" class="absolute right-4 top-4">
+      <i class="fa fa-close fa-lg"></i>
+    </button>
+    <form (ngSubmit)="onEditFormSubmit()" #editForm="ngForm">
+      <div class="form-group">
+        <label for="customerName">Customer Name</label>
+        <input
+          [(ngModel)]="selectedCustomer.customerName"
+          #customerName="ngModel"
+          type="text"
+          id="customerName"
+          name="customerName"
+          placeholder="Enter Customer Name"
+          required
+          maxlength="255"
+        />
+        @if (customerName.invalid && customerName.touched) {
+        <div *ngIf="customerName.errors?.['required']" class="text-red-500">
+          Customer Name is required.
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="customerAddress">Customer Address</label>
+        <input
+          [(ngModel)]="selectedCustomer.customerAddress"
+          #customerAddress="ngModel"
+          type="text"
+          class="h-20 align-top"
+          id="customerAddress"
+          ngModel
+          name="customerAddress"
+          placeholder="Enter Customer Address"
+          required
+          maxlength="255"
+        />
+        @if (customerAddress.invalid && customerAddress.touched) {
+        <div *ngIf="customerAddress.errors?.['required']" class="text-red-500">
+          Customer Address is required.
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="customerName">Phone Number</label>
+        <input
+          [(ngModel)]="selectedCustomer.customerPhone"
+          #customerPhone="ngModel"
+          type="tel"
+          id="customerPhone"
+          ngModel
+          name="customerPhone"
+          placeholder="Enter Phone Number"
+          required
+          maxlength="20"
+        />
+        @if (customerPhone.invalid && customerPhone.touched) {
+        <div *ngIf="customerPhone.errors?.['required']" class="text-red-500">
+          Phone number is required.
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="customerName">Avatar</label>
+        <img
+          [src]="imagePreview != null ? imagePreview : selectedCustomer.pic"
+          class="max-h-[130px] mb-2"
+          alt=""
+        />
+        <input
+          #pic="ngModel"
+          ngModel
+          type="file"
+          id="pic"
+          name="pic"
+          placeholder="Enter Avatar file"
+          accept="image/*"
+          (change)="onFileChange($event)"
+        />
+      </div>
+      <div class="flex justify-stretch">
+        <button
+          type="submit"
+          [disabled]="editForm.invalid"
+          class="btn-edit w-full"
+        >
+          Edit Customer
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 }

@@ -1,9 +1,15 @@
 <div class="content-container">
-  <h1 class="page-title">Item</h1>
+  <div class="flex justify-between align-middle">
+    <h1 class="page-title">Item</h1>
+    <button (click)="openAddFormDialog()" class="btn-add h-fit">
+      + Add New
+    </button>
+  </div>
   <table class="table-auto w-full">
     <thead>
       <tr>
         <th>Name</th>
+        <th>Availability</th>
         <th>Stock</th>
         <th>Price</th>
         <th>Last Restock date</th>
@@ -14,13 +20,18 @@
       @for (item of items; track $index) {
       <tr class="text-center p-80">
         <td class="py-8">{{ item.itemName }}</td>
+        <td class="py-8">
+          {{ item.isAvailable ? "Available" : "Not Available" }}
+        </td>
         <td class="py-8">{{ item.stock }}</td>
         <td class="py-8">{{ item.price }}</td>
         <td class="py-8">{{ item.lastReStock }}</td>
         <td class="py-8">
           <div>
-            <button class="btn-edit">Edit</button>
-            <button (click)="openDialog(item.itemId)" class="btn-delete">
+            <button (click)="openEditFormDialog(item)" class="btn-edit">
+              Edit
+            </button>
+            <button (click)="openDialog(item)" class="btn-delete">
               Delete
             </button>
           </div>
@@ -32,9 +43,193 @@
 </div>
 
 <!-- Confirmation Dialog Overlay -->
-<div *ngIf="isDialogOpen" class="overlay">
+<div *ngIf="isConfirmDialogOpen" class="overlay">
   <app-dialog-confimation
     (cancelEvent)="closeDialog()"
     (confirmDeleteEvent)="deleteItem()"
   ></app-dialog-confimation>
 </div>
+
+<!-- Add Form Dialog -->
+@if (isAddCusFormOpen) {
+<div class="overlay">
+  <div class="relative bg-white p-6 rounded-md shadow-lg max-w-md w-full">
+    <h2 class="text-xl font-semibold mb-4 text-center">Add New Item</h2>
+    <button (click)="closeAddFormDialog()" class="absolute right-4 top-4">
+      <i class="fa fa-close fa-lg"></i>
+    </button>
+    <form (ngSubmit)="onAddFormSubmit()" #addForm="ngForm">
+      <div class="form-group">
+        <label for="itemName">Item Name</label>
+        <input
+          ngModel
+          #itemName="ngModel"
+          type="text"
+          id="itemName"
+          name="itemName"
+          placeholder="Enter Item Name"
+          required
+          maxlength="255"
+        />
+        @if (itemName.invalid && itemName.touched) {
+        <div *ngIf="itemName.errors?.['required']" class="text-red-500">
+          Item Name is required.
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="itemStock">Item Stock</label>
+        <input
+          ngModel
+          #itemStock="ngModel"
+          type="number"
+          id="itemStock"
+          name="itemStock"
+          placeholder="Enter Item Stock"
+          required
+        />
+        @if (itemStock.invalid && itemStock.touched) {
+        <div *ngIf="itemStock.errors?.['required']" class="text-red-500">
+          Item Stock is required.
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="itemPrice">Item Price</label>
+        <input
+          ngModel
+          #itemPrice="ngModel"
+          type="number"
+          id="itemPrice"
+          name="itemPrice"
+          placeholder="Enter Item Price"
+          required
+        />
+        @if (itemPrice.invalid && itemPrice.touched) {
+        <div *ngIf="itemPrice.errors?.['required']" class="text-red-500">
+          Item price is required.
+        </div>
+        }
+      </div>
+      <div class="flex justify-stretch">
+        <button
+          type="submit"
+          [disabled]="addForm.invalid"
+          class="btn-add w-full"
+        >
+          Add New Item
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- Edit Form Dialog -->
+@if (isEditCusFormOpen) {
+<div class="overlay">
+  <div class="relative bg-white p-6 rounded-md shadow-lg max-w-md w-full">
+    <h2 class="text-xl font-semibold mb-4 text-center">Edit Item</h2>
+    <button (click)="closeEditFormDialog()" class="absolute right-4 top-4">
+      <i class="fa fa-close fa-lg"></i>
+    </button>
+    <form (ngSubmit)="onEditFormSubmit()" #editForm="ngForm">
+      <div class="form-group">
+        <label for="itemName">Item Name</label>
+        <input
+          [(ngModel)]="selectedItem.itemName"
+          #itemName="ngModel"
+          type="text"
+          id="itemName"
+          name="itemName"
+          placeholder="Enter Item Name"
+          required
+          maxlength="255"
+        />
+        @if (itemName.invalid && itemName.touched) {
+        <div *ngIf="itemName.errors?.['required']" class="text-red-500">
+          Item Name is required.
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="itemStock">Item Stock</label>
+        <input
+          [(ngModel)]="selectedItem.stock"
+          #itemStock="ngModel"
+          type="number"
+          id="itemStock"
+          name="itemStock"
+          placeholder="Enter Item Stock"
+          required
+        />
+        @if (itemStock.invalid && itemStock.touched) {
+        <div *ngIf="itemStock.errors?.['required']" class="text-red-500">
+          Item Stock is required.
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="itemPrice">Item Price</label>
+        <input
+          [(ngModel)]="selectedItem.price"
+          #itemPrice="ngModel"
+          type="number"
+          id="itemPrice"
+          name="itemPrice"
+          placeholder="Enter Item Price"
+          required
+        />
+        @if (itemPrice.invalid && itemPrice.touched) {
+        <div *ngIf="itemPrice.errors?.['required']" class="text-red-500">
+          Item price is required.
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label>Item Price</label>
+        <label>
+          <input
+            [(ngModel)]="selectedItem.isAvailable"
+            #itemAvailability="ngModel"
+            type="radio"
+            name="itemAvailability"
+            required
+            [value]="true"
+            class="radio"
+            required
+          />
+          Available
+        </label>
+        <label>
+          <input
+            [(ngModel)]="selectedItem.isAvailable"
+            #itemAvailability="ngModel"
+            type="radio"
+            name="itemAvailability"
+            required
+            [value]="false"
+            class="radio"
+          />
+          Not Available
+        </label>
+
+        @if (itemPrice.invalid && itemPrice.touched) {
+        <div *ngIf="itemPrice.errors?.['required']" class="text-red-500">
+          Item price is required.
+        </div>
+        }
+      </div>
+      <div class="flex justify-stretch">
+        <button
+          type="submit"
+          [disabled]="editForm.invalid"
+          class="btn-edit w-full"
+        >
+          Update Item
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}

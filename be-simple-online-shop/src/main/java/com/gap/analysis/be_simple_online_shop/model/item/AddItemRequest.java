@@ -30,7 +30,7 @@ public class AddItemRequest {
     private Long price;
 
     @NotNull(message = "Is Available has to be filled")
-    private Boolean isAvailable;
+    private Boolean isAvailable = true;
 
     private Date lastReStock = new Date();
 }

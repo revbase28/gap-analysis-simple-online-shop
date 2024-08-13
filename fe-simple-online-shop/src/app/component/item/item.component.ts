@@ -1,36 +1,89 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Item } from '../../../tools/typedef';
 import { ItemService } from '../../service/item.service';
 import moment from 'moment';
 import { DialogConfimationComponent } from '../dialog-confimation/dialog-confimation.component';
 import { NgIf } from '@angular/common';
+import { FormsModule, NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-item',
   standalone: true,
-  imports: [NgIf, DialogConfimationComponent],
+  imports: [NgIf, DialogConfimationComponent, FormsModule],
   templateUrl: './item.component.html',
   styleUrl: './item.component.css',
 })
 export class ItemComponent implements OnInit {
   items: Item[] = [];
-  isDialogOpen = false;
-  selectedItem: number | undefined;
+  isConfirmDialogOpen: boolean = false;
+  isAddCusFormOpen: boolean = false;
+  isEditCusFormOpen: boolean = false;
+
+  emptyItem: Item = {
+    itemId: -1,
+    itemName: '',
+    itemCode: '',
+    price: -1,
+    stock: -1,
+    isAvailable: false,
+    lastReStock: new Date(),
+  };
+
+  selectedItem: Item = this.emptyItem;
 
   constructor(private itemService: ItemService) {}
+
+  @ViewChild('addForm') addForm: NgForm | undefined;
+  @ViewChild('editForm') editForm: NgForm | undefined;
 
   ngOnInit(): void {
     this.fetchAllItem();
     console.log(this.items);
   }
 
-  openDialog(itemId: number) {
-    this.isDialogOpen = true;
-    this.selectedItem = itemId;
+  openDialog(item: Item) {
+    this.isConfirmDialogOpen = true;
+    this.selectedItem = item;
   }
 
   closeDialog() {
-    this.isDialogOpen = false;
+    this.selectedItem = this.emptyItem;
+    this.isConfirmDialogOpen = false;
+  }
+
+  // Add Customer Functionality
+  onAddFormSubmit() {
+    if (this.addForm?.valid) {
+      this.addItem();
+      // console.log(this.addForm.value);
+    }
+  }
+
+  openAddFormDialog() {
+    this.isAddCusFormOpen = true;
+  }
+
+  closeAddFormDialog() {
+    this.selectedItem = this.emptyItem;
+    this.isAddCusFormOpen = false;
+  }
+
+  // Edit Customer Functionality
+  openEditFormDialog(item: Item) {
+    console.log(item);
+    this.selectedItem = item;
+    this.isEditCusFormOpen = true;
+  }
+
+  closeEditFormDialog() {
+    this.selectedItem = this.emptyItem;
+    this.isEditCusFormOpen = false;
+  }
+
+  onEditFormSubmit() {
+    if (this.editForm?.valid) {
+      this.updateItem();
+    }
   }
 
   fetchAllItem() {
@@ -49,9 +102,44 @@ export class ItemComponent implements OnInit {
     );
   }
 
+  addItem() {
+    const formData = new FormData();
+    formData.append('itemName', this.addForm?.value.itemName);
+    formData.append('stock', this.addForm?.value.itemStock);
+    formData.append('price', this.addForm?.value.itemPrice);
+
+    this.itemService.addNewItem(formData).subscribe(
+      (response: any) => {
+        this.fetchAllItem();
+        this.isAddCusFormOpen = false;
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+
+  updateItem() {
+    const formData = new FormData();
+    formData.append('itemName', this.editForm?.value.itemName);
+    formData.append('stock', this.editForm?.value.itemStock);
+    formData.append('price', this.editForm?.value.itemPrice);
+    formData.append('isAvailable', this.editForm?.value.itemAvailability);
+
+    this.itemService.updateItem(this.selectedItem.itemId, formData).subscribe(
+      (response: any) => {
+        this.fetchAllItem();
+        this.isEditCusFormOpen = false;
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+
   deleteItem() {
     if (this.selectedItem != undefined) {
-      this.itemService.deleteItem(this.selectedItem).subscribe(
+      this.itemService.deleteItem(this.selectedItem.itemId).subscribe(
         (response: any) => {
           this.fetchAllItem();
         },
@@ -62,6 +150,6 @@ export class ItemComponent implements OnInit {
     } else {
       console.log('Selected Order is undefined');
     }
-    this.isDialogOpen = false;
+    this.isConfirmDialogOpen = false;
   }
 }

@@ -14,6 +14,14 @@ export class CustomerService {
     return this.http.get<any[]>(this.apiUrl);
   }
 
+  addNewCustomer(formData: FormData): Observable<any> {
+    return this.http.post(this.apiUrl, formData);
+  }
+
+  updateCustomer(id: number, formData: FormData): Observable<any> {
+    return this.http.patch(this.apiUrl + '/' + id, formData);
+  }
+
   deleteCustoemer(id: number) {
     return this.http.delete<any>(this.apiUrl + '/' + id);
   }

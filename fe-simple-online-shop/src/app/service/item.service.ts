@@ -15,6 +15,14 @@ export class ItemService {
     return this.http.get<any[]>(this.apiUrl);
   }
 
+  addNewItem(formData: FormData): Observable<any> {
+    return this.http.post(this.apiUrl, formData);
+  }
+
+  updateItem(id: number, formData: FormData): Observable<any> {
+    return this.http.patch(this.apiUrl + '/' + id, formData);
+  }
+
   deleteItem(id: number) {
     return this.http.delete<any>(this.apiUrl + '/' + id);
   }
