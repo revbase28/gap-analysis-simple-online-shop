@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
@@ -53,7 +54,18 @@ public class CustomerService {
     }
 
     public List<Customer> getAllActiveCustomer() {
-        return customerRepository.findByIsActive(true);
+        List<Customer> customers = customerRepository.findByIsActive(true);
+
+        return customers.stream().peek(customer -> {
+            String fileName = customer.getPic();
+            String fileLink = null;
+            try {
+                fileLink = minioService.getPresignedUrl(fileName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            customer.setPic(fileLink);
+        }).collect(Collectors.toList());
     }
 
     public Customer getCustomerById(long id){

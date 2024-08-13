@@ -1,0 +1,40 @@
+<div class="content-container">
+  <h1 class="page-title">Item</h1>
+  <table class="table-auto w-full">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Stock</th>
+        <th>Price</th>
+        <th>Last Restock date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items; track $index) {
+      <tr class="text-center p-80">
+        <td class="py-8">{{ item.itemName }}</td>
+        <td class="py-8">{{ item.stock }}</td>
+        <td class="py-8">{{ item.price }}</td>
+        <td class="py-8">{{ item.lastReStock }}</td>
+        <td class="py-8">
+          <div>
+            <button class="btn-edit">Edit</button>
+            <button (click)="openDialog(item.itemId)" class="btn-delete">
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<!-- Confirmation Dialog Overlay -->
+<div *ngIf="isDialogOpen" class="overlay">
+  <app-dialog-confimation
+    (cancelEvent)="closeDialog()"
+    (confirmDeleteEvent)="deleteItem()"
+  ></app-dialog-confimation>
+</div>

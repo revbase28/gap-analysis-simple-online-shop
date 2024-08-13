@@ -1,0 +1,112 @@
+<div class="content-container">
+  <div class="flex justify-between align-middle">
+    <h1 class="page-title">Customer</h1>
+    <button (click)="isFormOpen = true" class="btn-add h-fit">+ Add New</button>
+  </div>
+  <table class="table-auto w-full">
+    <thead>
+      <tr class="bg-slate-700 text-slate-50">
+        <th class="py-6">Avatar</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Phone Number</th>
+        <th>Last Order Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (customer of customers; track $index) {
+      <tr class="text-center p-80 odd:bg-slate-100">
+        <td class="py-8">
+          <img src="{{ customer.pic }}" class="size-20 rounded-full mx-auto" />
+        </td>
+        <td class="py-8">{{ customer.customerName }}</td>
+        <td class="py-8">{{ customer.customerAddress }}</td>
+        <td class="py-8">{{ customer.customerPhone }}</td>
+        <td class="py-8">
+          {{
+            customer.lastOrderDate == null ? "No Order" : customer.lastOrderDate
+          }}
+        </td>
+        <td class="py-8">
+          <div>
+            <button class="btn-edit">Edit</button>
+            <button
+              (click)="openDialog(customer.customerId)"
+              class="btn-delete"
+            >
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<!-- Confirmation Dialog Overlay -->
+<div *ngIf="isDialogOpen" class="overlay">
+  <app-dialog-confimation
+    (cancelEvent)="closeDialog()"
+    (confirmDeleteEvent)="deleteCustomer()"
+  ></app-dialog-confimation>
+</div>
+
+<!-- Form Dialog -->
+@if (isFormOpen) {
+<div class="overlay">
+  <div class="bg-white p-6 rounded-md shadow-lg max-w-md w-full">
+    <h2 class="text-xl font-semibold mb-4 text-center">Add New Customer</h2>
+    <button></button>
+    <form (ngSubmit)="({})" #addForm="ngForm">
+      <div class="form-group">
+        <label for="customerName">Customer Name</label>
+        <input
+          type="text"
+          id="customerName"
+          ngModel
+          name="customerName"
+          placeholder="Enter Customer Name"
+        />
+      </div>
+      <div class="form-group">
+        <label for="customerAddress">Customer Address</label>
+        <input
+          type="text"
+          class="h-20 align-top"
+          id="customerAddress"
+          ngModel
+          name="customerAddress"
+          placeholder="Enter Customer Address"
+        />
+      </div>
+      <div class="form-group">
+        <label for="customerName">Phone Number</label>
+        <input
+          type="text"
+          id="customerPhone"
+          ngModel
+          name="customerPhone"
+          placeholder="Enter Phone Number"
+        />
+      </div>
+      <div class="form-group">
+        <label for="customerName">Phone Number</label>
+        <input
+          type="file"
+          id="customerPhone"
+          ngModel
+          name="customerPhone"
+          placeholder="Enter Phone Number"
+        />
+      </div>
+    </form>
+    <div class="flex justify-stretch">
+      <button (click)="isFormOpen = false" class="btn-add w-full">
+        Add New Customer
+      </button>
+    </div>
+  </div>
+</div>
+}
