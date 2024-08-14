@@ -1,45 +1,47 @@
 <div class="content-container">
-  <div class="flex justify-between align-middle">
-    <h1 class="page-title">Item</h1>
-    <button (click)="openAddFormDialog()" class="btn-add h-fit">
+  <div class="flex flex-col md:flex-row justify-between align-middle">
+    <h1 class="page-title">Order</h1>
+    <button (click)="openAddFormDialog()" class="btn-add h-fit mb-5 md:mb-0">
       + Add New
     </button>
   </div>
-  <table class="table-auto w-full">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Availability</th>
-        <th>Stock</th>
-        <th>Price</th>
-        <th>Last Restock date</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (item of items; track $index) {
-      <tr class="text-center p-80">
-        <td class="py-8">{{ item.itemName }}</td>
-        <td class="py-8">
-          {{ item.isAvailable ? "Available" : "Not Available" }}
-        </td>
-        <td class="py-8">{{ item.stock }}</td>
-        <td class="py-8">{{ item.price }}</td>
-        <td class="py-8">{{ item.lastReStock }}</td>
-        <td class="py-8">
-          <div>
-            <button (click)="openEditFormDialog(item)" class="btn-edit">
-              Edit
-            </button>
-            <button (click)="openDialog(item)" class="btn-delete">
-              Delete
-            </button>
-          </div>
-        </td>
-      </tr>
-      }
-    </tbody>
-  </table>
+  <div class="overflow-x-auto">
+    <table class="table-auto w-full">
+      <thead>
+        <tr class="bg-slate-700 text-slate-50">
+          <th class="py-6">Name</th>
+          <th>Availability</th>
+          <th>Stock</th>
+          <th>Price</th>
+          <th>Last Restock date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track $index) {
+        <tr class="text-center p-80 odd:bg-slate-100">
+          <td class="py-8">{{ item.itemName }}</td>
+          <td class="py-8">
+            {{ item.isAvailable ? "Available" : "Not Available" }}
+          </td>
+          <td class="py-8">{{ item.stock }}</td>
+          <td class="py-8">{{ item.price }}</td>
+          <td class="py-8">{{ item.lastReStock }}</td>
+          <td class="py-8">
+            <div>
+              <button (click)="openEditFormDialog(item)" class="btn-edit">
+                Edit
+              </button>
+              <button (click)="openDialog(item)" class="btn-delete">
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <!-- Confirmation Dialog Overlay -->
@@ -51,7 +53,7 @@
 </div>
 
 <!-- Add Form Dialog -->
-@if (isAddCusFormOpen) {
+@if (isAddItemFormOpen) {
 <div class="overlay">
   <div class="relative bg-white p-6 rounded-md shadow-lg max-w-md w-full">
     <h2 class="text-xl font-semibold mb-4 text-center">Add New Item</h2>
@@ -126,7 +128,7 @@
 }
 
 <!-- Edit Form Dialog -->
-@if (isEditCusFormOpen) {
+@if (isEditItemFormOpen) {
 <div class="overlay">
   <div class="relative bg-white p-6 rounded-md shadow-lg max-w-md w-full">
     <h2 class="text-xl font-semibold mb-4 text-center">Edit Item</h2>

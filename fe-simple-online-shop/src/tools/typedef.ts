@@ -11,6 +11,11 @@ export interface Customer {
   pic: string;
 }
 
+export interface CustomerData {
+  customerId: number;
+  customerName: string;
+}
+
 export interface Item {
   itemId: number;
   itemName: string;
@@ -27,6 +32,6 @@ export interface Order {
   orderDate: Date;
   totalPrice: number;
   quantity: number;
-  customer: Customer;
-  item: Item;
+  customer: Customer | null;
+  item: Item | null;
 }

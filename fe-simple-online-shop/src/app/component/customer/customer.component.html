@@ -1,7 +1,7 @@
 <div class="content-container">
-  <div class="flex justify-between align-middle">
+  <div class="flex flex-col md:flex-row justify-between align-middle">
     <h1 class="page-title">Customer</h1>
-    <button (click)="openAddFormDialog()" class="btn-add h-fit">
+    <button (click)="openAddFormDialog()" class="btn-add h-fit mb-5 md:mb-0">
       + Add New
     </button>
   </div>
@@ -19,17 +19,17 @@
     <tbody>
       @for (customer of customers; track $index) {
       <tr class="text-center p-80 odd:bg-slate-100">
-        <td class="py-8">
+        <td class="py-8 mx-2">
           <img src="{{ customer.pic }}" class="size-20 rounded-full mx-auto" />
         </td>
-        <td class="py-8">{{ customer.customerName }}</td>
-        <td class="py-8">{{ customer.customerAddress }}</td>
-        <td class="py-8">{{ customer.customerPhone }}</td>
-        <td class="py-8">
+        <td class="py-8 mx-2">{{ customer.customerName }}</td>
+        <td class="py-8 mx-2">{{ customer.customerAddress }}</td>
+        <td class="py-8 mx-2">{{ customer.customerPhone }}</td>
+        <td class="py-8 mx-2">
           {{ customer.lastOrderDate ? customer.lastOrderDate : "No Order" }}
         </td>
         <td class="py-8">
-          <div>
+          <div class="flex flex-col md:flex-row justify-center">
             <button (click)="openEditFormDialog(customer)" class="btn-edit">
               Edit
             </button>

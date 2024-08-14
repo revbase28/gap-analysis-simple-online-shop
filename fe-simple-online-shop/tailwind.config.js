@@ -2,7 +2,11 @@
 module.exports = {
   content: ["./src/**/*.{html,ts}"],
   theme: {
-    extend: {},
+    extend: {
+      gridTemplateColumns: {
+        container: "1.5fr repeat(7, minmax(0, 1fr))",
+      },
+    },
   },
   plugins: [],
 };

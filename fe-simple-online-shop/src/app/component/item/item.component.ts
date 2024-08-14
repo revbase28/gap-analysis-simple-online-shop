@@ -16,8 +16,8 @@ import { FormsModule, NgForm } from '@angular/forms';
 export class ItemComponent implements OnInit {
   items: Item[] = [];
   isConfirmDialogOpen: boolean = false;
-  isAddCusFormOpen: boolean = false;
-  isEditCusFormOpen: boolean = false;
+  isAddItemFormOpen: boolean = false;
+  isEditItemFormOpen: boolean = false;
 
   emptyItem: Item = {
     itemId: -1,
@@ -51,7 +51,7 @@ export class ItemComponent implements OnInit {
     this.isConfirmDialogOpen = false;
   }
 
-  // Add Customer Functionality
+  // Add Item Functionality
   onAddFormSubmit() {
     if (this.addForm?.valid) {
       this.addItem();
@@ -60,24 +60,24 @@ export class ItemComponent implements OnInit {
   }
 
   openAddFormDialog() {
-    this.isAddCusFormOpen = true;
+    this.isAddItemFormOpen = true;
   }
 
   closeAddFormDialog() {
     this.selectedItem = this.emptyItem;
-    this.isAddCusFormOpen = false;
+    this.isAddItemFormOpen = false;
   }
 
-  // Edit Customer Functionality
+  // Edit Item Functionality
   openEditFormDialog(item: Item) {
     console.log(item);
     this.selectedItem = item;
-    this.isEditCusFormOpen = true;
+    this.isEditItemFormOpen = true;
   }
 
   closeEditFormDialog() {
     this.selectedItem = this.emptyItem;
-    this.isEditCusFormOpen = false;
+    this.isEditItemFormOpen = false;
   }
 
   onEditFormSubmit() {
@@ -111,7 +111,7 @@ export class ItemComponent implements OnInit {
     this.itemService.addNewItem(formData).subscribe(
       (response: any) => {
         this.fetchAllItem();
-        this.isAddCusFormOpen = false;
+        this.isAddItemFormOpen = false;
       },
       (error) => {
         console.log(error);
@@ -129,7 +129,7 @@ export class ItemComponent implements OnInit {
     this.itemService.updateItem(this.selectedItem.itemId, formData).subscribe(
       (response: any) => {
         this.fetchAllItem();
-        this.isEditCusFormOpen = false;
+        this.isEditItemFormOpen = false;
       },
       (error) => {
         console.log(error);

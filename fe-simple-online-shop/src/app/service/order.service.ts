@@ -15,6 +15,14 @@ export class OrderService {
     return this.http.get<any[]>(this.apiUrl);
   }
 
+  addNewOrder(formData: FormData): Observable<any> {
+    return this.http.post(this.apiUrl, formData);
+  }
+
+  updateOrder(id: number, formData: FormData): Observable<any> {
+    return this.http.patch(this.apiUrl + '/' + id, formData);
+  }
+
   deleteOrder(id: number) {
     return this.http.delete<any>(this.apiUrl + '/' + id);
   }

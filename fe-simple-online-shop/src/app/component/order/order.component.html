@@ -1,9 +1,14 @@
 <div class="content-container">
-  <h1 class="page-title">Item</h1>
+  <div class="flex flex-col md:flex-row justify-between align-middle">
+    <h1 class="page-title">Order</h1>
+    <button (click)="openAddFormDialog()" class="btn-add h-fit mb-5 md:mb-0">
+      + Add New
+    </button>
+  </div>
   <table class="table-auto w-full">
     <thead>
-      <tr>
-        <th>Order Date</th>
+      <tr class="bg-slate-700 text-slate-50">
+        <th class="py-6">Order Date</th>
         <th>Order Code</th>
         <th>Item</th>
         <th>Quantity</th>
@@ -14,18 +19,24 @@
     </thead>
     <tbody>
       @for (order of orders; track $index) {
-      <tr class="text-center p-80">
+      <tr class="text-center p-80 odd:bg-slate-100">
         <td class="py-8">{{ order.orderDate }}</td>
         <td class="py-8">{{ order.orderCode }}</td>
-        <td class="py-8">{{ order.item.itemName }}</td>
+        <td class="py-8">{{ order.item?.itemName }}</td>
         <td class="py-8">{{ order.quantity }}</td>
-        <td class="py-8">{{ order.customer.customerName }}</td>
+        <td class="py-8">{{ order.customer?.customerName }}</td>
         <td class="py-8">{{ order.totalPrice }}</td>
 
         <td class="py-8">
           <div>
-            <button class="btn-edit">Edit</button>
-            <button (click)="openDialog(order.orderId)" class="btn-delete">
+            <button
+              (click)="openEditFormDialog(order)"
+              [disabled]="!order.item?.isAvailable"
+              class="btn-edit"
+            >
+              Edit
+            </button>
+            <button (click)="openDialog(order)" class="btn-delete">
               Delete
             </button>
           </div>
@@ -37,9 +48,168 @@
 </div>
 
 <!-- Confirmation Dialog Overlay -->
-<div *ngIf="isDialogOpen" class="overlay">
+<div *ngIf="isConfirmDialogOpen" class="overlay">
   <app-dialog-confimation
     (cancelEvent)="closeDialog()"
     (confirmDeleteEvent)="deleteOrder()"
   ></app-dialog-confimation>
 </div>
+
+<!-- Add Form Dialog -->
+@if (isAddOrderFormOpen) {
+<div class="overlay">
+  <div class="relative bg-white p-6 rounded-md shadow-lg max-w-md w-full">
+    <h2 class="text-xl font-semibold mb-4 text-center">Add New Order</h2>
+    <button (click)="closeAddFormDialog()" class="absolute right-4 top-4">
+      <i class="fa fa-close fa-lg"></i>
+    </button>
+    <form (ngSubmit)="onAddFormSubmit()" #addForm="ngForm">
+      <div class="form-group">
+        <label for="customer">Select Customer</label>
+        <select
+          name="customer"
+          id="customer"
+          [(ngModel)]="customerSelectedDV"
+          #customer="ngModel"
+        >
+          @for (customer of customers; track $index) {
+          <option
+            value="{{ customer.customerId }}"
+            [defaultSelected]="$index == 0"
+          >
+            {{ customer.customerName }}
+          </option>
+          }
+        </select>
+        @if (customer.invalid && customer.touched) {
+        <div *ngIf="customer.errors?.['required']" class="text-red-500">
+          Customer has to be selected
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="item">Select Item</label>
+        <select
+          name="item"
+          id="item"
+          [(ngModel)]="itemSelectedDV"
+          #item="ngModel"
+        >
+          @for (item of items; track $index) {
+          <option value="{{ item.itemId }}" [defaultSelected]="$index == 0">
+            {{ item.itemName }}
+          </option>
+          }
+        </select>
+        @if (item.invalid && item.touched) {
+        <div *ngIf="item.errors?.['required']" class="text-red-500">
+          Item has to be selected
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <input
+          ngModel
+          #quantity="ngModel"
+          type="number"
+          id="quantity"
+          name="quantity"
+          placeholder="Enter Quantity"
+          required
+          min="1"
+          max="{{ findItemQuantityById(itemSelectedDV) }}"
+        />
+        @if (quantity.invalid && quantity.touched) {
+        <div *ngIf="quantity.errors?.['required']" class="text-red-500">
+          Item Stock is required.
+        </div>
+        <div *ngIf="quantity.errors?.['min']" class="text-red-500">
+          Minimum quantity is one
+        </div>
+        <div *ngIf="quantity.errors?.['max']" class="text-red-500">
+          Stock is not enough
+        </div>
+        }
+      </div>
+      <div class="flex justify-stretch">
+        <button
+          type="submit"
+          [disabled]="addForm.invalid"
+          class="btn-add w-full"
+        >
+          Add New Order
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- Edit Form Dialog -->
+@if (isEditOrderFormOpen) {
+<div class="overlay">
+  <div class="relative bg-white p-6 rounded-md shadow-lg max-w-md w-full">
+    <h2 class="text-xl font-semibold mb-4 text-center">Edit Order</h2>
+    <button (click)="closeEditFormDialog()" class="absolute right-4 top-4">
+      <i class="fa fa-close fa-lg"></i>
+    </button>
+    <form (ngSubmit)="onEditFormSubmit()" #editForm="ngForm">
+      <div class="form-group">
+        <label for="item">Select Item</label>
+        <select
+          name="item"
+          id="item"
+          [(ngModel)]="itemSelectedDV"
+          #item="ngModel"
+        >
+          @for (item of items; track $index) {
+          <option value="{{ item.itemId }}" [defaultSelected]="$index == 0">
+            {{ item.itemName }}
+          </option>
+          }
+        </select>
+        @if (item.invalid && item.touched) {
+        <div *ngIf="item.errors?.['required']" class="text-red-500">
+          Item has to be selected
+        </div>
+        }
+      </div>
+      <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <input
+          [(ngModel)]="selectedOrder.quantity"
+          #quantity="ngModel"
+          type="number"
+          id="quantity"
+          name="quantity"
+          placeholder="Enter Quantity"
+          required
+          min="1"
+          max="{{ findItemQuantityById(itemSelectedDV) }}"
+        />
+        @if (quantity.invalid && quantity.touched) {
+        <div *ngIf="quantity.errors?.['required']" class="text-red-500">
+          Item Stock is required.
+        </div>
+        <div *ngIf="quantity.errors?.['min']" class="text-red-500">
+          Minimum quantity is one
+        </div>
+        <div *ngIf="quantity.errors?.['max']" class="text-red-500">
+          Stock is not enough
+        </div>
+        }
+      </div>
+      <div class="flex justify-stretch">
+        <button
+          type="submit"
+          [disabled]="editForm.invalid"
+          class="btn-edit w-full"
+        >
+          Update Order
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
