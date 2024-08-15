@@ -15,7 +15,7 @@ body {
   }
 
   .btn-edit {
-    @apply p-2 min-w-[5em] rounded-md bg-blue-400 mb-2 lg:mb-0 lg:mr-1 text-white shadow-sm hover:bg-blue-500 active:hover:bg-blue-600 disabled:opacity-50;
+    @apply p-2 min-w-[5em] rounded-md bg-blue-400 mb-2 md:mb-0 md:mr-1 text-white shadow-sm hover:bg-blue-500 active:hover:bg-blue-600 disabled:opacity-50;
   }
 
   .btn-delete {
@@ -24,6 +24,10 @@ body {
 
   .btn-add {
     @apply p-2 w-[75vw] md:w-fit md:min-w-[5em] rounded-md bg-green-400 text-white shadow-sm hover:bg-green-500 active:hover:bg-green-600 disabled:opacity-50;
+  }
+
+  .btn-report {
+    @apply p-2 w-[75vw] md:w-fit md:min-w-[5em] rounded-md bg-yellow-400 text-white shadow-sm hover:bg-yellow-500 active:hover:bg-yellow-600 disabled:opacity-50;
   }
 
   .page-title {

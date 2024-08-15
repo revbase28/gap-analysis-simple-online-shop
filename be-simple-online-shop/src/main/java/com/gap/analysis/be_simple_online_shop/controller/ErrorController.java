@@ -27,6 +27,7 @@ public class ErrorController {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<WebResponse<String>> exception(Exception exception){
+        exception.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(WebResponse.<String>builder().error(exception.getMessage()).build());
     }

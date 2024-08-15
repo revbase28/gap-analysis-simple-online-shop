@@ -5,7 +5,12 @@ import com.gap.analysis.be_simple_online_shop.model.WebResponse;
 import com.gap.analysis.be_simple_online_shop.model.order.AddOrderRequest;
 import com.gap.analysis.be_simple_online_shop.model.order.PatchOrderRequest;
 import com.gap.analysis.be_simple_online_shop.service.OrderService;
+import com.gap.analysis.be_simple_online_shop.service.ReportService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +21,9 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private ReportService reportService;
 
     @PostMapping("/api/order")
     WebResponse<String> addNewOrder(@ModelAttribute AddOrderRequest request){
@@ -45,5 +53,23 @@ public class OrderController {
     WebResponse<String> deleteOrder(@PathVariable Long id)  {
         orderService.deleteOrder(id);
         return WebResponse.<String>builder().data("Delete order success").build();
+    }
+
+    @GetMapping(value = "/api/order/report")
+    ResponseEntity<byte[]> downloadOrderReport() throws Exception {
+        try {
+            byte[] pdfReport = reportService.generateOrderReport();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "order_report.pdf");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfReport);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(null);
+        }
     }
 }

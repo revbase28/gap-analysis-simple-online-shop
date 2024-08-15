@@ -9,6 +9,7 @@ import { error } from 'console';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CustomerService } from '../../service/customer.service';
 import { ItemService } from '../../service/item.service';
+import { rupiahFormat } from '../../../tools/const';
 
 @Component({
   selector: 'app-order',
@@ -114,6 +115,7 @@ export class OrderComponent {
         this.orders = response.data.map((order: Order) => {
           return {
             ...order,
+            totalPrice: rupiahFormat.format(order.totalPrice),
             orderDate: moment(order.orderDate).format('D MMMM YYYY HH:MM'),
           };
         });
@@ -213,5 +215,26 @@ export class OrderComponent {
       console.log('Selected Order is undefined');
     }
     this.isConfirmDialogOpen = false;
+  }
+
+  generateReport() {
+    this.orderService.getReport().subscribe(
+      (response: any) => {
+        console.log(response.data);
+        const url = window.URL.createObjectURL(
+          new Blob([response], { type: 'application/pdf' })
+        );
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'report.pdf';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
   }
 }

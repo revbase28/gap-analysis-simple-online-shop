@@ -1,9 +1,17 @@
 <div class="content-container">
   <div class="flex flex-col md:flex-row justify-between align-middle">
     <h1 class="page-title">Order</h1>
-    <button (click)="openAddFormDialog()" class="btn-add h-fit mb-5 md:mb-0">
-      + Add New
-    </button>
+    <div>
+      <button
+        (click)="openAddFormDialog()"
+        class="btn-add h-fit mb-5 md:mb-0 md:mr-2"
+      >
+        + Add New
+      </button>
+      <button (click)="generateReport()" class="btn-report h-fit mb-5 md:mb-0">
+        Generate Report
+      </button>
+    </div>
   </div>
   <table class="table-auto w-full">
     <thead>

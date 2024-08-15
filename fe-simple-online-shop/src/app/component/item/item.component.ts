@@ -5,6 +5,7 @@ import moment from 'moment';
 import { DialogConfimationComponent } from '../dialog-confimation/dialog-confimation.component';
 import { NgIf } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { rupiahFormat } from '../../../tools/const';
 
 @Component({
   selector: 'app-item',
@@ -92,6 +93,7 @@ export class ItemComponent implements OnInit {
         this.items = response.data.map((item: Item) => {
           return {
             ...item,
+            price: rupiahFormat.format(item.price),
             lastReStock: moment(item.lastReStock).format('D MMMM YYYY HH:MM'),
           };
         });

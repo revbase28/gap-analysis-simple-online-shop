@@ -26,4 +26,10 @@ export class OrderService {
   deleteOrder(id: number) {
     return this.http.delete<any>(this.apiUrl + '/' + id);
   }
+
+  getReport() {
+    return this.http.get<any>(this.apiUrl + '/report', {
+      responseType: 'arraybuffer' as 'json',
+    });
+  }
 }
