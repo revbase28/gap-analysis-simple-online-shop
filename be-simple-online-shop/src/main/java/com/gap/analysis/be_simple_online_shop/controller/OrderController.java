@@ -1,5 +1,6 @@
 package com.gap.analysis.be_simple_online_shop.controller;
 
+import com.gap.analysis.be_simple_online_shop.entity.Item;
 import com.gap.analysis.be_simple_online_shop.entity.Order;
 import com.gap.analysis.be_simple_online_shop.model.WebResponse;
 import com.gap.analysis.be_simple_online_shop.model.order.AddOrderRequest;
@@ -8,6 +9,7 @@ import com.gap.analysis.be_simple_online_shop.service.OrderService;
 import com.gap.analysis.be_simple_online_shop.service.ReportService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +34,20 @@ public class OrderController {
     }
 
     @GetMapping("/api/order")
-    WebResponse<List<Order>> getAllOrder(){
-        List<Order> orders = orderService.getAllOrder();
-        return WebResponse.<List<Order>>builder().data(orders).build();
+    WebResponse<Page<Order>> getAllOrder(@RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "5") int size){
+        Page<Order> orders = orderService.getAllOrder(page, size);
+        return WebResponse.<Page<Order>>builder().data(orders).build();
+    }
+
+    @GetMapping(path = "/api/order/search")
+    public WebResponse<Page<Order>> searchItem(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        Page<Order> orders = orderService.searchOrder(keyword, page, size);
+        return WebResponse.<Page<Order>>builder().data(orders).build();
     }
 
     @GetMapping("/api/order/{id}")

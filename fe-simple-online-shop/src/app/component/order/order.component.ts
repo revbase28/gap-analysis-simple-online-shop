@@ -10,11 +10,19 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { CustomerService } from '../../service/customer.service';
 import { ItemService } from '../../service/item.service';
 import { rupiahFormat } from '../../../tools/const';
+import { PaginationNavigatorComponent } from '../pagination-navigator/pagination-navigator.component';
+import { SearchBarComponent } from '../search-bar/search-bar.component';
 
 @Component({
   selector: 'app-order',
   standalone: true,
-  imports: [NgIf, DialogConfimationComponent, FormsModule],
+  imports: [
+    NgIf,
+    DialogConfimationComponent,
+    FormsModule,
+    PaginationNavigatorComponent,
+    SearchBarComponent,
+  ],
   templateUrl: './order.component.html',
   styleUrl: './order.component.css',
 })
@@ -22,6 +30,11 @@ export class OrderComponent {
   orders: Order[] = [];
   customers: CustomerData[] = [];
   items: Item[] = [];
+
+  searchKeyword: string = '';
+
+  totalPage: number = 0;
+  activePage: number = 1;
 
   customerSelectedDV: number = -1;
   itemSelectedDV: number = -1;
@@ -109,16 +122,39 @@ export class OrderComponent {
     }
   }
 
-  fetchAllOrder() {
-    this.orderService.fetchAll().subscribe(
+  fetchAllOrder(page: number = 0) {
+    this.orderService.fetchAll(page).subscribe(
       (response: any) => {
-        this.orders = response.data.map((order: Order) => {
+        this.orders = response.data.content.map((order: Order) => {
           return {
             ...order,
             totalPrice: rupiahFormat.format(order.totalPrice),
             orderDate: moment(order.orderDate).format('D MMMM YYYY HH:MM'),
           };
         });
+
+        this.totalPage = response.data.totalPages;
+        this.activePage = response.data.pageable.pageNumber + 1;
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+
+  searchOrder(page: number = 0) {
+    this.orderService.searchOrder(this.searchKeyword, page).subscribe(
+      (response: any) => {
+        this.orders = response.data.content.map((order: Order) => {
+          return {
+            ...order,
+            totalPrice: rupiahFormat.format(order.totalPrice),
+            orderDate: moment(order.orderDate).format('D MMMM YYYY HH:MM'),
+          };
+        });
+
+        this.totalPage = response.data.totalPages;
+        this.activePage = response.data.pageable.pageNumber + 1;
       },
       (error) => {
         console.log(error);
@@ -127,7 +163,7 @@ export class OrderComponent {
   }
 
   fetchCustomer() {
-    this.customerService.fetchCustomer().subscribe(
+    this.customerService.fetchCustomerWithoutPagination().subscribe(
       (response: any) => {
         this.customers = response.data.map((customer: Customer) => {
           const customerData: CustomerData = {
@@ -147,7 +183,7 @@ export class OrderComponent {
   }
 
   fetchAvailableItem() {
-    this.itemService.fetchAll().subscribe(
+    this.itemService.fetchAllWithoutPagination().subscribe(
       (response: any) => {
         this.items = response.data.filter((item: Item) => item.isAvailable);
         this.itemSelectedDV = this.items[0].itemId;
@@ -236,5 +272,44 @@ export class OrderComponent {
         console.log(error);
       }
     );
+  }
+
+  fetchWithCondition() {
+    if (this.searchKeyword == '') {
+      this.fetchAllOrder(this.activePage - 1);
+    } else {
+      this.searchOrder(this.activePage - 1);
+    }
+  }
+
+  // Pagination Related
+  nextPage() {
+    if (this.activePage != this.totalPage) {
+      this.activePage = this.activePage + 1;
+      this.fetchWithCondition();
+    }
+  }
+
+  prevPage() {
+    if (this.activePage > 1) {
+      this.activePage = this.activePage - 1;
+      this.fetchWithCondition();
+    }
+  }
+
+  changeActivePage(page: number) {
+    this.activePage = page;
+    this.fetchWithCondition();
+  }
+
+  // Search functionality
+  onSearchEvent(keyword: string) {
+    this.searchKeyword = keyword;
+    this.searchOrder();
+  }
+
+  onKeywordReset() {
+    this.searchKeyword = '';
+    this.fetchAllOrder();
   }
 }

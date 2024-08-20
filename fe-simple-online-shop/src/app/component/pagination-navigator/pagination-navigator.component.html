@@ -1,0 +1,59 @@
+<div class="pagination">
+  <ul>
+    <li (click)="prevPage()">< Prev</li>
+    <!-- Case when there is more than five page -->
+    @if (pageCount >= 5) {
+    <!-- 1 2 3 4 .. X -->
+    @if (activePage < 3) { @for (_ of [].constructor(3 + (activePage - 1));track
+    $index) {
+    <li
+      (click)="changeActivePage($index + 1)"
+      [class.active]="$index + 1 == activePage"
+    >
+      {{ $index + 1 }}
+    </li>
+    }
+    <li>...</li>
+    <li
+      (click)="changeActivePage(pageCount)"
+      [class.active]="activePage == pageCount"
+    >
+      {{ pageCount }}
+    </li>
+    } @else {
+    <!-- 1 .. 3 4 5 .. X -->
+    <li (click)="changeActivePage(1)" [class.active]="1 == activePage">
+      {{ 1 }}
+    </li>
+    <li>..</li>
+
+    @for (_ of [].constructor(3); track $index) { @if ($index + activePage <
+    pageCount) {
+    <li
+      (click)="changeActivePage($index + activePage)"
+      [class.active]="$index + activePage == activePage"
+    >
+      {{ $index + activePage }}
+    </li>
+    } } @if (pageCount - activePage > 3) {
+    <li>..</li>
+    }
+    <li
+      (click)="changeActivePage(pageCount)"
+      [class.active]="activePage == pageCount"
+    >
+      {{ pageCount }}
+    </li>
+    } }
+    <!-- Case where there are only 5 page -->
+    @else { @for (_ of [].constructor(pageCount); track $index) {
+    <li
+      (click)="changeActivePage($index + 1)"
+      [class.active]="$index + 1 == activePage"
+    >
+      {{ $index + 1 }}
+    </li>
+    } }
+    <li (click)="nextPage()">Next ></li>
+  </ul>
+</div>

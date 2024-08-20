@@ -5,11 +5,15 @@ import com.gap.analysis.be_simple_online_shop.entity.Item;
 import com.gap.analysis.be_simple_online_shop.model.item.AddItemRequest;
 import com.gap.analysis.be_simple_online_shop.model.item.PatchItemRequest;
 import com.gap.analysis.be_simple_online_shop.repository.ItemRepository;
+import com.gap.analysis.be_simple_online_shop.repository.OrderRepository;
 import com.gap.analysis.be_simple_online_shop.tools.Patcher;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +27,9 @@ public class ItemService {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Autowired
     private Validator validator;
@@ -47,6 +54,16 @@ public class ItemService {
 
     public List<Item> getAllItem(){
         return itemRepository.findAll();
+    }
+
+    public Page<Item> getAllItemWithPagination(int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return itemRepository.findAll(pageable);
+    }
+
+    public Page<Item> searchItem(String keyword, int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return itemRepository.searchItem(keyword, pageable);
     }
 
     public Item getItemById(long id){
@@ -96,6 +113,8 @@ public class ItemService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no item with id " + id);
         }
 
+
+        orderRepository.deleteByItem(optItem.get());
         itemRepository.delete(optItem.get());
     }
 }

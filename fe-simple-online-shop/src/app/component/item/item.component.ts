@@ -6,16 +6,29 @@ import { DialogConfimationComponent } from '../dialog-confimation/dialog-confima
 import { NgIf } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { rupiahFormat } from '../../../tools/const';
+import { PaginationNavigatorComponent } from '../pagination-navigator/pagination-navigator.component';
+import { SearchBarComponent } from '../search-bar/search-bar.component';
 
 @Component({
   selector: 'app-item',
   standalone: true,
-  imports: [NgIf, DialogConfimationComponent, FormsModule],
+  imports: [
+    NgIf,
+    DialogConfimationComponent,
+    FormsModule,
+    PaginationNavigatorComponent,
+    SearchBarComponent,
+  ],
   templateUrl: './item.component.html',
   styleUrl: './item.component.css',
 })
 export class ItemComponent implements OnInit {
   items: Item[] = [];
+  totalPage: number = 0;
+  activePage: number = 1;
+
+  searchKeyword: string = '';
+
   isConfirmDialogOpen: boolean = false;
   isAddItemFormOpen: boolean = false;
   isEditItemFormOpen: boolean = false;
@@ -87,21 +100,46 @@ export class ItemComponent implements OnInit {
     }
   }
 
-  fetchAllItem() {
-    this.itemService.fetchAll().subscribe(
+  fetchAllItem(page: number = 0) {
+    this.itemService.fetchAll(page).subscribe(
       (response: any) => {
-        this.items = response.data.map((item: Item) => {
+        this.items = response.data.content.map((item: Item) => {
           return {
             ...item,
-            price: rupiahFormat.format(item.price),
             lastReStock: moment(item.lastReStock).format('D MMMM YYYY HH:MM'),
           };
         });
+
+        this.totalPage = response.data.totalPages;
+        this.activePage = response.data.pageable.pageNumber + 1;
       },
       (error) => {
         console.log(error);
       }
     );
+  }
+
+  searchItem(page: number = 0) {
+    this.itemService.searchItem(this.searchKeyword, page).subscribe(
+      (response: any) => {
+        this.items = response.data.content.map((item: Item) => {
+          return {
+            ...item,
+            lastReStock: moment(item.lastReStock).format('D MMMM YYYY HH:MM'),
+          };
+        });
+
+        this.totalPage = response.data.totalPages;
+        this.activePage = response.data.pageable.pageNumber + 1;
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+
+  formatToRupiah(price: number): string {
+    return rupiahFormat.format(price);
   }
 
   addItem() {
@@ -153,5 +191,44 @@ export class ItemComponent implements OnInit {
       console.log('Selected Order is undefined');
     }
     this.isConfirmDialogOpen = false;
+  }
+
+  fetchWithCondition() {
+    if (this.searchKeyword == '') {
+      this.fetchAllItem(this.activePage - 1);
+    } else {
+      this.searchItem(this.activePage - 1);
+    }
+  }
+
+  // Pagination Related
+  nextPage() {
+    if (this.activePage != this.totalPage) {
+      this.activePage = this.activePage + 1;
+      this.fetchWithCondition();
+    }
+  }
+
+  prevPage() {
+    if (this.activePage > 1) {
+      this.activePage = this.activePage - 1;
+      this.fetchWithCondition();
+    }
+  }
+
+  changeActivePage(page: number) {
+    this.activePage = page;
+    this.fetchWithCondition();
+  }
+
+  // Search functionality
+  onSearchEvent(keyword: string) {
+    this.searchKeyword = keyword;
+    this.searchItem();
+  }
+
+  onKeywordReset() {
+    this.searchKeyword = '';
+    this.fetchAllItem();
   }
 }

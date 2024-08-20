@@ -6,6 +6,7 @@ import com.gap.analysis.be_simple_online_shop.model.item.AddItemRequest;
 import com.gap.analysis.be_simple_online_shop.model.item.PatchItemRequest;
 import com.gap.analysis.be_simple_online_shop.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,10 +24,26 @@ public class ItemController {
         return WebResponse.<String>builder().data("Add item Success").build();
     }
 
-    @GetMapping(path = "/api/item")
+    @GetMapping(path = "/api/item-all")
     public WebResponse<List<Item>> getAllItem(){
-        List<Item> items = itemService.getAllItem();
-        return WebResponse.<List<Item>>builder().data(items).build();
+        return WebResponse.<List<Item>>builder().data(itemService.getAllItem()).build();
+    }
+
+    @GetMapping(path = "/api/item")
+    public WebResponse<Page<Item>> getAllItem(@RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "5") int size){
+        Page<Item> items = itemService.getAllItemWithPagination(page, size);
+        return WebResponse.<Page<Item>>builder().data(items).build();
+    }
+
+    @GetMapping(path = "/api/item/search")
+    public WebResponse<Page<Item>> searchItem(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        Page<Item> items = itemService.searchItem(keyword, page, size);
+        return WebResponse.<Page<Item>>builder().data(items).build();
     }
 
     @GetMapping(path = "/api/item/{id}")

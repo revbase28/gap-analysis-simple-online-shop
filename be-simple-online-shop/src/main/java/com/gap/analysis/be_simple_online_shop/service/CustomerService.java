@@ -4,11 +4,15 @@ import com.gap.analysis.be_simple_online_shop.entity.Customer;
 import com.gap.analysis.be_simple_online_shop.model.customer.AddCustomerRequest;
 import com.gap.analysis.be_simple_online_shop.model.customer.PatchCustomerRequest;
 import com.gap.analysis.be_simple_online_shop.repository.CustomerRepository;
+import com.gap.analysis.be_simple_online_shop.repository.OrderRepository;
 import com.gap.analysis.be_simple_online_shop.tools.Patcher;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +28,9 @@ public class CustomerService {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Autowired
     private MinioService minioService;
@@ -66,6 +73,40 @@ public class CustomerService {
             }
             customer.setPic(fileLink);
         }).collect(Collectors.toList());
+    }
+
+    public Page<Customer> getAllActiveCustomerWithPagination(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> customers = customerRepository.findByIsActiveTrue(pageable);
+
+        return customers.map(customer -> {
+            String fileName = customer.getPic();
+            String fileLink = null;
+            try {
+                fileLink = minioService.getPresignedUrl(fileName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            customer.setPic(fileLink);
+            return customer;
+        });
+    }
+
+    public Page<Customer> searchCustomer(String keyword, int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> customers = customerRepository.searchActiveCustomers(keyword, pageable);
+
+        return customers.map(customer -> {
+            String fileName = customer.getPic();
+            String fileLink = null;
+            try {
+                fileLink = minioService.getPresignedUrl(fileName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            customer.setPic(fileLink);
+            return customer;
+        });
     }
 
     public Customer getCustomerById(long id){
@@ -138,6 +179,7 @@ public class CustomerService {
         Customer currentCus = optCurrentCus.get();
         currentCus.setIsActive(false);
 
+        orderRepository.deleteByCustomer(currentCus);
         customerRepository.save(currentCus);
     }
 }

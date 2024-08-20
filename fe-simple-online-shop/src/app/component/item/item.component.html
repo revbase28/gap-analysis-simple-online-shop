@@ -1,10 +1,14 @@
 <div class="content-container">
   <div class="flex flex-col md:flex-row justify-between align-middle">
-    <h1 class="page-title">Order</h1>
+    <h1 class="page-title">Item</h1>
     <button (click)="openAddFormDialog()" class="btn-add h-fit mb-5 md:mb-0">
       + Add New
     </button>
   </div>
+  <app-search-bar
+    (searchEvent)="onSearchEvent($event)"
+    (keywordResetEvent)="onKeywordReset()"
+  ></app-search-bar>
   <div class="overflow-x-auto">
     <table class="table-auto w-full">
       <thead>
@@ -25,7 +29,7 @@
             {{ item.isAvailable ? "Available" : "Not Available" }}
           </td>
           <td class="py-8">{{ item.stock }}</td>
-          <td class="py-8">{{ item.price }}</td>
+          <td class="py-8">{{ formatToRupiah(item.price) }}</td>
           <td class="py-8">{{ item.lastReStock }}</td>
           <td class="py-8">
             <div>
@@ -41,6 +45,13 @@
         }
       </tbody>
     </table>
+    <app-pagination-navigator
+      [activePage]="activePage"
+      [pageCount]="totalPage"
+      (nextPageEvent)="nextPage()"
+      (prevPageEvent)="prevPage()"
+      (pageClickedEvent)="changeActivePage($event)"
+    ></app-pagination-navigator>
   </div>
 </div>
 
@@ -189,7 +200,7 @@
         }
       </div>
       <div class="form-group">
-        <label>Item Price</label>
+        <label>Item Availability</label>
         <label>
           <input
             [(ngModel)]="selectedItem.isAvailable"

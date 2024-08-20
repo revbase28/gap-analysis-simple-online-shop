@@ -6,6 +6,7 @@ import com.gap.analysis.be_simple_online_shop.model.customer.PatchCustomerReques
 import com.gap.analysis.be_simple_online_shop.model.WebResponse;
 import com.gap.analysis.be_simple_online_shop.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,14 +24,33 @@ public class CustomerController {
         return WebResponse.<String>builder().data("Add Customer Success").build();
     }
 
-    @GetMapping(path = "/api/customer")
+    @GetMapping(path = "/api/customer-all")
     public WebResponse<List<Customer>> getAllActiveCustomer(){
         List<Customer> customers = customerService.getAllActiveCustomer();
         return WebResponse.<List<Customer>>builder().data(customers).build();
     }
 
+    @GetMapping(path = "/api/customer")
+    public WebResponse<Page<Customer>> getAllActiveCustomer(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        Page<Customer> customers = customerService.getAllActiveCustomerWithPagination(page, size);
+        return WebResponse.<Page<Customer>>builder().data(customers).build();
+    }
+
+    @GetMapping(path = "/api/customer/search")
+    public WebResponse<Page<Customer>> searchCustomer(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        Page<Customer> customers = customerService.searchCustomer(keyword, page, size);
+        return WebResponse.<Page<Customer>>builder().data(customers).build();
+    }
+
     @GetMapping(path = "/api/customer/{id}")
-    public WebResponse<Customer> getCustomerById(@PathVariable long id){
+    public WebResponse<Customer> getCustomerById(@PathVariable long id) {
         Customer customer = customerService.getCustomerById(id);
         return WebResponse.<Customer>builder().data(customer).build();
     }

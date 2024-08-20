@@ -13,6 +13,10 @@
       </button>
     </div>
   </div>
+  <app-search-bar
+    (searchEvent)="onSearchEvent($event)"
+    (keywordResetEvent)="onKeywordReset()"
+  ></app-search-bar>
   <table class="table-auto w-full">
     <thead>
       <tr class="bg-slate-700 text-slate-50">
@@ -53,6 +57,13 @@
       }
     </tbody>
   </table>
+  <app-pagination-navigator
+    [activePage]="activePage"
+    [pageCount]="totalPage"
+    (nextPageEvent)="nextPage()"
+    (prevPageEvent)="prevPage()"
+    (pageClickedEvent)="changeActivePage($event)"
+  ></app-pagination-navigator>
 </div>
 
 <!-- Confirmation Dialog Overlay -->

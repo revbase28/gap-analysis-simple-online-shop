@@ -1,0 +1,17 @@
+<div class="flex mb-3 max-md:w-[75vw]">
+  <input
+    class="block border border-slate-700 w-full px-2 py-2 bg-slate-50 rounded-md max-sm:mr-2 mr-3"
+    type="text"
+    name="keyword"
+    id="keyword"
+    placeholder="Enter Keyword Here"
+    [(ngModel)]="keyword"
+    (change)="onValueChange()"
+  />
+  <button
+    (click)="onSearch()"
+    class="p-2 sm:min-w-[5em] min-w-[4em] rounded-md bg-blue-400 text-white shadow-sm hover:bg-blue-500 active:hover:bg-blue-600 disabled:opacity-50"
+  >
+    <i class="fa fa-search fa-lg"></i>
+  </button>
+</div>

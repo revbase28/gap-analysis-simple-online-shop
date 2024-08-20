@@ -6,16 +6,29 @@ import { NgIf } from '@angular/common';
 import { DialogConfimationComponent } from '../dialog-confimation/dialog-confimation.component';
 import { FormsModule, NgForm } from '@angular/forms';
 import { read } from 'fs';
+import { PaginationNavigatorComponent } from '../pagination-navigator/pagination-navigator.component';
+import { SearchBarComponent } from '../search-bar/search-bar.component';
 
 @Component({
   selector: 'app-customer',
   standalone: true,
-  imports: [NgIf, DialogConfimationComponent, FormsModule],
+  imports: [
+    NgIf,
+    DialogConfimationComponent,
+    FormsModule,
+    PaginationNavigatorComponent,
+    SearchBarComponent,
+  ],
   templateUrl: './customer.component.html',
   styleUrl: './customer.component.css',
 })
 export class CustomerComponent implements OnInit {
   customers: Customer[] = [];
+  totalPage: number = 0;
+  activePage: number = 1;
+
+  searchKeyword: string = '';
+
   isConfirmDialogOpen: boolean = false;
   isAddCusFormOpen: boolean = false;
   isEditCusFormOpen: boolean = false;
@@ -118,10 +131,10 @@ export class CustomerComponent implements OnInit {
     );
   }
 
-  fetchCustomer() {
-    this.customerService.fetchCustomer().subscribe(
+  fetchCustomer(page: number = 0) {
+    this.customerService.fetchCustomer(page).subscribe(
       (response: any) => {
-        this.customers = response.data.map((customer: Customer) => {
+        this.customers = response.data.content.map((customer: Customer) => {
           return {
             ...customer,
             lastOrderDate:
@@ -129,6 +142,30 @@ export class CustomerComponent implements OnInit {
               moment(customer.lastOrderDate).format('D MMMM YYYY HH:MM'),
           };
         });
+
+        this.totalPage = response.data.totalPages;
+        this.activePage = response.data.pageable.pageNumber + 1;
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+
+  searchCustomer(page: number = 0) {
+    this.customerService.searchCustomer(this.searchKeyword, page).subscribe(
+      (response: any) => {
+        this.customers = response.data.content.map((customer: Customer) => {
+          return {
+            ...customer,
+            lastOrderDate:
+              customer.lastOrderDate != null &&
+              moment(customer.lastOrderDate).format('D MMMM YYYY HH:MM'),
+          };
+        });
+
+        this.totalPage = response.data.totalPages;
+        this.activePage = response.data.pageable.pageNumber + 1;
       },
       (error) => {
         console.log(error);
@@ -204,5 +241,44 @@ export class CustomerComponent implements OnInit {
       console.log('Selected Customer is undefined');
     }
     this.isConfirmDialogOpen = false;
+  }
+
+  fetchWithCondition() {
+    if (this.searchKeyword == '') {
+      this.fetchCustomer(this.activePage - 1);
+    } else {
+      this.searchCustomer(this.activePage - 1);
+    }
+  }
+
+  // Pagination Related
+  nextPage() {
+    if (this.activePage != this.totalPage) {
+      this.activePage = this.activePage + 1;
+      this.fetchWithCondition();
+    }
+  }
+
+  prevPage() {
+    if (this.activePage > 1) {
+      this.activePage = this.activePage - 1;
+      this.fetchWithCondition();
+    }
+  }
+
+  changeActivePage(page: number) {
+    this.activePage = page;
+    this.fetchWithCondition();
+  }
+
+  // Search functionality
+  onSearchEvent(keyword: string) {
+    this.searchKeyword = keyword;
+    this.searchCustomer();
+  }
+
+  onKeywordReset() {
+    this.searchKeyword = '';
+    this.fetchCustomer();
   }
 }

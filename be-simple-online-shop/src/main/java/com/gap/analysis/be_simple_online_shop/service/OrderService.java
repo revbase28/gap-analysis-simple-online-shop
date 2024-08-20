@@ -13,6 +13,9 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,10 +43,10 @@ public class OrderService {
     private Validator validator;
 
     @Transactional
-    public void addNewOrder(AddOrderRequest request){
+    public void addNewOrder(AddOrderRequest request) {
         Set<ConstraintViolation<AddOrderRequest>> constraintViolations = validator.validate(request);
 
-        if(constraintViolations.size() != 0){
+        if (constraintViolations.size() != 0) {
             throw new ConstraintViolationException(constraintViolations);
         }
 
@@ -51,21 +54,21 @@ public class OrderService {
         Optional<Customer> optCus = customerRepository.findById(request.getCustomerId());
         Optional<Item> optItem = itemRepository.findById(request.getItemId());
 
-        if(optCus.isEmpty()){
+        if (optCus.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no customer with id " + request.getCustomerId());
         }
 
-        if(optItem.isEmpty()){
+        if (optItem.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no item with id " + request.getItemId());
         }
 
         //Validate item stock readiness
-        if(optItem.get().getStock() < request.getQuantity()){
+        if (optItem.get().getStock() < request.getQuantity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity Exceed item stock");
         }
 
         //Validate item if is available
-        if(!optItem.get().getIsAvailable()){
+        if (!optItem.get().getIsAvailable()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item is not available");
         }
 
@@ -88,14 +91,20 @@ public class OrderService {
         customerRepository.save(updatedCustomer);
     }
 
-    public List<Order> getAllOrder(){
-        return orderRepository.findAll();
+    public Page<Order> getAllOrder(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return orderRepository.findAll(pageable);
     }
 
-    public Order getOrderById(Long id){
+    public Page<Order> searchOrder(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return orderRepository.searchOrder(keyword, pageable);
+    }
+
+    public Order getOrderById(Long id) {
         Optional<Order> optOrder = orderRepository.findById(id);
 
-        if(optOrder.isEmpty()){
+        if (optOrder.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no order with id " + id);
         }
 
@@ -106,35 +115,35 @@ public class OrderService {
     public void updateOrder(Long id, PatchOrderRequest request) throws IllegalAccessException {
         Set<ConstraintViolation<PatchOrderRequest>> constraintViolations = validator.validate(request);
 
-        if(constraintViolations.size() != 0){
+        if (constraintViolations.size() != 0) {
             throw new ConstraintViolationException(constraintViolations);
         }
 
         Optional<Order> optOrder = orderRepository.findById(id);
 
-        if(optOrder.isEmpty()){
+        if (optOrder.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no order with id " + id);
         }
 
         // Cek existence and availability of an item
         Item updatedItem;
         Optional<Item> optItem;
-        if(request.getItemId() != null){
+        if (request.getItemId() != null) {
             optItem = itemRepository.findById(request.getItemId());
 
-            if(optItem.isEmpty()){
+            if (optItem.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no item with id " + id);
             }
 
             // Check for availability if there is a change in item being ordered
-            if(!optItem.get().getIsAvailable() && optItem.get().getItemId() != request.getItemId()){
+            if (!optItem.get().getIsAvailable() && optItem.get().getItemId() != request.getItemId()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item is not available");
             }
 
         } else {
             optItem = itemRepository.findById(optOrder.get().getItem().getItemId());
 
-            if(optItem.isEmpty()){
+            if (optItem.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.GONE, "Item with id " + id + " is probably already deleted");
             }
         }
@@ -143,7 +152,7 @@ public class OrderService {
 
         // Handle change in stock
         // Case : same item, diff quantity => item.stock - (newQuantity - oldQuantity)
-        if(request.getItemId() == null || optOrder.get().getItem().getItemId() == request.getItemId()){
+        if (request.getItemId() == null || optOrder.get().getItem().getItemId() == request.getItemId()) {
             Long oldQuantity = optOrder.get().getQuantity();
             Long newQuantity = request.getQuantity();
 
@@ -173,17 +182,17 @@ public class OrderService {
         orderRepository.save(currOrder);
     }
 
-    public void deleteOrder(Long id){
+    public void deleteOrder(Long id) {
         Optional<Order> optOrder = orderRepository.findById(id);
 
-        if(optOrder.isEmpty()){
+        if (optOrder.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no order with id " + id);
         }
 
         // Return item stock
         Optional<Item> optItem = itemRepository.findById(optOrder.get().getItem().getItemId());
 
-        if(optItem.isPresent()){
+        if (optItem.isPresent()) {
             Item item = optItem.get();
             item.setStock(item.getStock() + optOrder.get().getQuantity());
             item.setIsAvailable(item.getStock() > 0);
