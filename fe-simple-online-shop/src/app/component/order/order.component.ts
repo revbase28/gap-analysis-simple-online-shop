@@ -254,24 +254,26 @@ export class OrderComponent {
   }
 
   generateReport() {
-    this.orderService.getReport().subscribe(
-      (response: any) => {
-        console.log(response.data);
-        const url = window.URL.createObjectURL(
-          new Blob([response], { type: 'application/pdf' })
-        );
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'report.pdf';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
+    this.orderService
+      .getReport(this.searchKeyword, this.activePage - 1)
+      .subscribe(
+        (response: any) => {
+          console.log(response.data);
+          const url = window.URL.createObjectURL(
+            new Blob([response], { type: 'application/pdf' })
+          );
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'report.pdf';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
   }
 
   fetchWithCondition() {

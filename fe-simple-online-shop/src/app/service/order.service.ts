@@ -46,9 +46,18 @@ export class OrderService {
     return this.http.delete<any>(this.apiUrl + '/' + id);
   }
 
-  getReport() {
+  getReport(keyword: string, page: number = 0) {
+    const queryParams = {
+      page: page,
+      size: 5,
+      keyword: keyword,
+    };
+
+    let params = new HttpParams({ fromObject: queryParams });
+
     return this.http.get<any>(this.apiUrl + '/report', {
       responseType: 'arraybuffer' as 'json',
+      params: params,
     });
   }
 }

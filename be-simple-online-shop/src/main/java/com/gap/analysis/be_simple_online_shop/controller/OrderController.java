@@ -69,9 +69,13 @@ public class OrderController {
     }
 
     @GetMapping(value = "/api/order/report")
-    ResponseEntity<byte[]> downloadOrderReport() throws Exception {
+    ResponseEntity<byte[]> downloadOrderReport(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) throws Exception {
         try {
-            byte[] pdfReport = reportService.generateOrderReport();
+            byte[] pdfReport = reportService.generateOrderReport(keyword, page, size);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
